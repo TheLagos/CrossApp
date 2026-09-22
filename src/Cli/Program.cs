@@ -1,14 +1,15 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using Core;
 
-Console.WriteLine("CrossApp - Cross-Platform Programming Lab");
-Console.WriteLine("Student: Bohuslav, Group: FEI-36");
-Console.WriteLine(new string('-', 52));
-Console.WriteLine($"OS (OSDescription)   : {RuntimeInformation.OSDescription}");
-Console.WriteLine($"OS (Environment)     : {Environment.OSVersion}");
-Console.WriteLine($"Process Architecture : {RuntimeInformation.ProcessArchitecture}");
-Console.WriteLine($".NET Version (CLR)   : {Environment.Version}");
-Console.WriteLine($"Runtime              : {RuntimeInformation.FrameworkDescription}");
-Console.WriteLine($"Application Directory: {AppContext.BaseDirectory}");
-Console.WriteLine($"Current Directory    : {Environment.CurrentDirectory}");
-Console.WriteLine(new string('-', 52));
-Console.WriteLine("Domain: Order ( Customer, Product, Order)");
+EnvironmentReport report = EnvironmentInfo.Collect();
+
+Console.WriteLine("CrossApp - Env Info");
+Console.WriteLine(new string('-', 56));
+Console.WriteLine($"OS (OSDescription)   : {report.OsDescription}");
+Console.WriteLine($"Runtime         : {report.FrameworkDescription}");
+Console.WriteLine($"Architecture : {report.ProcessArchitecture}");
+Console.WriteLine($"RID (def) : {report.DetectedRid}");
+Console.WriteLine($"RID (friom .NET)  : {report.ReportedRid}");
+Console.WriteLine($"Catalog         : {report.BaseDirectory}");
+Console.WriteLine($"Target build  : {report.BuildNote}");
+Console.WriteLine(new string('-', 56));
