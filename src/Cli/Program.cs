@@ -1,74 +1,57 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using Core;
+using Core.Abstractions;
 using Core.Domain;
-using Core.Dto;
-using Core.Import;
+using Core.Services;
+using Core.Storage;
+
+bool useFile = args.Contains("--file");
+string dataPath = Path.Combine(AppContext.BaseDirectory, "data", "catalog.json");
+
+ICatalogStore store = useFile
+    ? new FileCatalogStore(dataPath)
+    : new InMemoryCatalogStore(SampleData.Products());
+
+var service = new CatalogService(store);
 
 Console.WriteLine("========================================================");
-Console.WriteLine("SCENARIO 1: Successful Domain Operations");
+Console.WriteLine($"Active Catalog Storage Engine: {store.GetType().Name}");
 Console.WriteLine("========================================================");
 
-Product product = Product.Create("P-001", "SKU-001", "Cement M400 25kg", "pcs", 100);
-Console.WriteLine($"Initial Entity : {product}");
-
-product.RegisterArrival(50);
-Console.WriteLine($"After Arrival  : {product}");
-
-product.Issue(30);
-Console.WriteLine($"After Issue    : {product}");
-
-product.ChangeStatus(ProductStatus.Discontinued);
-Console.WriteLine($"After Status   : {product}");
+Console.WriteLine($"Total Products in Catalog: {service.All().Count}");
 Console.WriteLine();
 
-Console.WriteLine("========================================================");
-Console.WriteLine("SCENARIO 2: Domain Invariant Failure Handling");
-Console.WriteLine("========================================================");
+Console.WriteLine("--> Creating new product via CatalogService...");
+Product created = service.Add("SKU-999", "UTP Cable Cat6", "m", 100);
+Console.WriteLine($"    Created: {created}");
 
-TryDo("Issue exceeds stock balance", () => 
-{
-    var activeProduct = Product.Create("P-TEST", "SKU-TEST", "Test Item", "pcs", 50);
-    activeProduct.Issue(1000);
-});
-TryDo("Create product with empty SKU", () => Product.Create("P-002", "", "Sand", "t", 10));
-TryDo("Create negative initial stock", () => Product.Create("P-003", "SKU-003", "Red Brick", "pcs", -5));
-TryDo("Illegal transition Archived->Active", () => 
-{
-    var archivedProd = Product.Create("P-004", "SKU-004", "Paint 10L", "pcs", 10, ProductStatus.Archived);
-    archivedProd.ChangeStatus(ProductStatus.Active);
-});
+Console.WriteLine("--> Registering arrival (+50 m)...");
+service.Receive(created.Id, 50);
+Console.WriteLine($"    Updated: {service.Find(created.Id)}");
+
+Console.WriteLine("--> Issuing stock (-30 m)...");
+service.Issue(created.Id, 30);
+Console.WriteLine($"    Updated: {service.Find(created.Id)}");
 
 Console.WriteLine();
-Console.WriteLine($"Final Product State Check (Quantity remains untouched): {product}");
-Console.WriteLine();
-
-Console.WriteLine("========================================================");
-Console.WriteLine("SCENARIO 3: Batch Import & Domain Conversion (Lab 3 + 4)");
-Console.WriteLine("========================================================");
-
-string csvPath = args.Length > 0 ? args[0] : Path.Combine("data", "sample.csv");
-if (File.Exists(csvPath))
+Console.WriteLine("--> Current Top 5 Catalog Items:");
+foreach (var p in service.All().Take(5))
 {
-    ImportResult<ProductDto> dtoResult = ProductCsvImporter.Load(csvPath);
-    ImportResult<Product> domainResult = ProductBatchConverter.ToEntities(dtoResult);
-
-    Console.WriteLine($"Imported Domain Entities : {domainResult.Items.Count}");
-    Console.WriteLine($"Total Domain Errors      : {domainResult.Errors.Count}");
-
-    if (domainResult.Errors.Count > 0)
-    {
-        Console.WriteLine("Domain Errors Log:");
-        foreach (string err in domainResult.Errors)
-        {
-            Console.WriteLine($" ! {err}");
-        }
-    }
-}
-else
-{
-    Console.WriteLine($"CSV Sample File Not Found: {Path.GetFullPath(csvPath)}");
+    Console.WriteLine($"    {p.Id,-8} {p.Sku,-10} {p.Name,-25} {p.Quantity,5} {p.Unit}");
 }
 
+Console.WriteLine();
+Console.WriteLine("========================================================");
+Console.WriteLine("SERVICE ERROR SCENARIO HANDLING");
+Console.WriteLine("========================================================");
+
+TryDo("Receive stock for non-existing product ID", () => service.Receive("NON-EXISTENT-ID", 100));
+TryDo("Add duplicate product entity direct to store", () => store.Add(created));
+
+Console.WriteLine();
+Console.WriteLine($"Final Store Catalog Count: {service.All().Count}");
 return 0;
 
 static void TryDo(string title, Action action)
@@ -76,7 +59,7 @@ static void TryDo(string title, Action action)
     try
     {
         action();
-        Console.WriteLine($" [FAIL] {title}: Invariant was NOT enforced!");
+        Console.WriteLine($" [FAIL] {title}: Exception was NOT thrown!");
     }
     catch (Exception ex)
     {
