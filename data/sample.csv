@@ -1,0 +1,14 @@
+id;sku;name;unit;quantity
+P-001;SKU-001;Cement M400 25kg;pcs;120
+P-002;SKU-002;Building Sand;t;18
+P-003;SKU-003;Red Brick;pcs;4200
+P-004;SKU-004;Water Paint 10L;pcs;36
+P-005;SKU-005;Finish Plaster;kg;250
+P-006;SKU-006;Profile CD-60;m;800
+P-007;SKU-007;Self-tapping Screws;pack;140
+P-008;SKU-008;Primer Penetration;l;60
+P-009;SKU-009;Ceramic Tile;m2;310
+P-010;SKU-010;Tile Adhesive;kg;540
+P-011;SKU-011;Drywall 12.5mm;sheet
+P-012;SKU-012;Reinforcing Tape;m;many
+P-013;;No SKU Item;pcs;10

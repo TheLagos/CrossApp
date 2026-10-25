@@ -1,0 +1,6 @@
+[
+  { "id": "P-101", "sku": "SKU-101", "name": "Concrete Mixer 150L", "unit": "pcs", "quantity": 5 },
+  { "id": "P-102", "sku": "SKU-102", "name": "Stepladder 5 steps", "unit": "pcs", "quantity": 12 },
+  { "id": "P-103", "sku": "", "name": "Broken JSON Item", "unit": "pcs", "quantity": 3 },
+  { "id": "P-104", "sku": "SKU-104", "name": "Invalid Qty Item", "unit": "pcs", "quantity": -10 }
+]
