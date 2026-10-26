@@ -11,6 +11,7 @@ Purpose: Processing orders and calculating totals.
   * `Core/Domain/` — Encapsulated Domain Entities (`Product`, `ProductStatus`, `ProductBatchConverter`).
   * `Core/Abstractions/` — Storage Interfaces (`ICatalogStore`).
   * `Core/Services/` — Business Application Services (`CatalogService`).
+  * `Core/Events/` — Domain Events Infrastructure (`CatalogChangeKind`, `CatalogChangedEventArgs`).
 * `src/Cli/` - console entry point (`ProjectReference` to `Core`).
 
 ## Domain: Warehouse Management
